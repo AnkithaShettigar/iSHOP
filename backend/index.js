@@ -1,11 +1,13 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
 import dotenv from 'dotenv';
 import seedRouter from './routes/seedRoutes.js';
 import productRouter from './routes/productRoute.js';
 import userRouter from './routes/userRoutes.js';
 import orderRouter from './routes/orderRoutes.js';
-// import path from 'path';
 import cors from 'cors';
 
 dotenv.config();
@@ -40,6 +42,22 @@ app.use('/api/orders', orderRouter);
 
 app.use((err, req, res, next) => {
   res.status(500).send({ message: err.message });
+});
+
+//serving the frontend
+const __filename = fileURLToPath(import.meta.url);
+
+const __dirname = path.dirname(__filename);
+console.log(__dirname);
+app.use(express.static(path.join(__dirname, './frontend/build')));
+
+app.get('*', function (_, res) {
+  res.sendFile(
+    path.join(__dirname, './frontend/build/index.html'),
+    function (err) {
+      res.status(500).send(err);
+    }
+  );
 });
 
 const port = process.env.PORT || 8080;
